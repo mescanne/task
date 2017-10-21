@@ -35,7 +35,7 @@
 #include <i18n.h>
 #include <stdlib.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ColumnUDAString::ColumnUDAString ()
@@ -85,7 +85,7 @@ void ColumnUDAString::measure (Task& task, unsigned int& minimum, unsigned int& 
     }
     else if (_style == "indicator")
     {
-      auto indicator = context.config.get ("uda." + _name + ".indicator");
+      auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
       if (indicator == "")
         indicator = "U";
 
@@ -114,7 +114,7 @@ void ColumnUDAString::render (
     }
     else if (_style == "indicator")
     {
-      auto indicator = context.config.get ("uda." + _name + ".indicator");
+      auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
       if (indicator == "")
         indicator = "U";
 
@@ -166,7 +166,7 @@ void ColumnUDANumeric::measure (Task& task, unsigned int& minimum, unsigned int&
     }
     else if (_style == "indicator")
     {
-      auto indicator = context.config.get ("uda." + _name + ".indicator");
+      auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
       if (indicator == "")
         indicator = "U";
 
@@ -191,7 +191,7 @@ void ColumnUDANumeric::render (
     }
     else if (_style == "indicator")
     {
-      auto indicator = context.config.get ("uda." + _name + ".indicator");
+      auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
       if (indicator == "")
         indicator = "U";
 
@@ -245,18 +245,18 @@ void ColumnUDADate::measure (Task& task, unsigned int& minimum, unsigned int& ma
         //   rc.dateformat.report
         //   rc.dateformat
         Datetime date ((time_t) strtol (value.c_str (), NULL, 10));
-        auto format = context.config.get ("report." + _report + ".dateformat");
+        auto format = Context::getContext().config.get ("report." + _report + ".dateformat");
         if (format == "")
-          format = context.config.get ("dateformat.report");
+          format = Context::getContext().config.get ("dateformat.report");
         if (format == "")
-          format = context.config.get ("dateformat");
+          format = Context::getContext().config.get ("dateformat");
 
         minimum = maximum = Datetime::length (format);
       }
     }
     else if (_style == "indicator")
     {
-      auto indicator = context.config.get ("uda." + _name + ".indicator");
+      auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
       if (indicator == "")
         indicator = "U";
 
@@ -282,19 +282,19 @@ void ColumnUDADate::render (
       //   rc.report.<report>.dateformat
       //   rc.dateformat.report
       //   rc.dateformat.
-      auto format = context.config.get ("report." + _report + ".dateformat");
+      auto format = Context::getContext().config.get ("report." + _report + ".dateformat");
       if (format == "")
       {
-        format = context.config.get ("dateformat.report");
+        format = Context::getContext().config.get ("dateformat.report");
         if (format == "")
-          format = context.config.get ("dateformat");
+          format = Context::getContext().config.get ("dateformat");
       }
 
       renderStringLeft (lines, width, color, Datetime ((time_t) strtol (value.c_str (), NULL, 10)).toString (format));
     }
     else if (_style == "indicator")
     {
-      auto indicator = context.config.get ("uda." + _name + ".indicator");
+      auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
       if (indicator == "")
         indicator = "U";
 
@@ -348,7 +348,7 @@ void ColumnUDADuration::measure (Task& task, unsigned int& minimum, unsigned int
     {
       if (task.has (_name))
       {
-        auto indicator = context.config.get ("uda." + _name + ".indicator");
+        auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
         if (indicator == "")
           indicator = "U";
 
@@ -376,7 +376,7 @@ void ColumnUDADuration::render (
     }
     else if (_style == "indicator")
     {
-      auto indicator = context.config.get ("uda." + _name + ".indicator");
+      auto indicator = Context::getContext().config.get ("uda." + _name + ".indicator");
       if (indicator == "")
         indicator = "U";
 

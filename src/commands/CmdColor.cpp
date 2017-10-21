@@ -35,7 +35,7 @@
 #include <shared.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdColor::CmdColor ()
@@ -60,13 +60,13 @@ int CmdColor::execute (std::string& output)
 
   // Get the non-attribute, non-fancy command line arguments.
   auto legend = false;
-  auto words = context.cli2.getWords ();
+  auto words = Context::getContext().cli2.getWords ();
   for (auto& word : words)
     if (closeEnough ("legend", word))
       legend = true;
 
   std::stringstream out;
-  if (context.color ())
+  if (Context::getContext().color ())
   {
     // If the description contains 'legend', show all the colors currently in
     // use.
@@ -75,13 +75,13 @@ int CmdColor::execute (std::string& output)
       out << '\n' << STRING_CMD_COLOR_HERE << '\n';
 
       Table view;
-      view.width (context.getWidth ());
-      if (context.config.getBoolean ("color"))
+      view.width (Context::getContext().getWidth ());
+      if (Context::getContext().config.getBoolean ("color"))
         view.forceColor ();
       view.add (STRING_CMD_COLOR_COLOR);
       view.add (STRING_CMD_COLOR_DEFINITION);
 
-      for (auto& item : context.config)
+      for (auto& item : Context::getContext().config)
       {
         // Skip items with 'color' in their name, that are not referring to
         // actual colors.
@@ -89,7 +89,7 @@ int CmdColor::execute (std::string& output)
             item.first != "color"       &&
             item.first.find ("color") == 0)
         {
-          Color color (context.config.get (item.first));
+          Color color (Context::getContext().config.get (item.first));
           int row = view.addRow ();
           view.set (row, 0, item.first, color);
           view.set (row, 1, item.second, color);

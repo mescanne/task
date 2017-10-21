@@ -37,7 +37,7 @@
 #include <util.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdUDAs::CmdUDAs ()
@@ -62,7 +62,7 @@ int CmdUDAs::execute (std::string& output)
   std::stringstream out;
 
   std::vector <std::string> udas;
-  for (auto& name : context.config)
+  for (auto& name : Context::getContext().config)
   {
     if (name.first.substr (0, 4) == "uda." &&
         name.first.find (".type") != std::string::npos)
@@ -85,7 +85,7 @@ int CmdUDAs::execute (std::string& output)
     // Render a list of UDA name, type, label, allowed values,
     // possible default value, and finally the usage count.
     Table table;
-    table.width (context.getWidth ());
+    table.width (Context::getContext().getWidth ());
     table.add (STRING_COLUMN_LABEL_UDA);
     table.add (STRING_COLUMN_LABEL_TYPE);
     table.add (STRING_COLUMN_LABEL_LABEL);
@@ -96,10 +96,10 @@ int CmdUDAs::execute (std::string& output)
 
     for (auto& uda : udas)
     {
-      std::string type   = context.config.get ("uda." + uda + ".type");
-      std::string label  = context.config.get ("uda." + uda + ".label");
-      std::string values = context.config.get ("uda." + uda + ".values");
-      std::string defval = context.config.get ("uda." + uda + ".default");
+      std::string type   = Context::getContext().config.get ("uda." + uda + ".type");
+      std::string label  = Context::getContext().config.get ("uda." + uda + ".label");
+      std::string values = Context::getContext().config.get ("uda." + uda + ".values");
+      std::string defval = Context::getContext().config.get ("uda." + uda + ".default");
       if (label == "")
         label = uda;
 
@@ -132,13 +132,13 @@ int CmdUDAs::execute (std::string& output)
     rc = 1;
   }
 
-  // Orphans are task attributes that are not represented in context.columns.
+  // Orphans are task attributes that are not represented in Context::getContext().columns.
   std::map <std::string, int> orphans;
   for (auto& i : filtered)
   {
     for (auto& att : i.data)
       if (att.first.substr (0, 11) != "annotation_" &&
-          context.columns.find (att.first) == context.columns.end ())
+          Context::getContext().columns.find (att.first) == Context::getContext().columns.end ())
         orphans[att.first]++;
   }
 
@@ -146,7 +146,7 @@ int CmdUDAs::execute (std::string& output)
   {
     // Display the orphans and their counts.
     Table orphanTable;
-    orphanTable.width (context.getWidth ());
+    orphanTable.width (Context::getContext().getWidth ());
     orphanTable.add (STRING_COLUMN_LABEL_ORPHAN);
     orphanTable.add (STRING_COLUMN_LABEL_UDACOUNT);
     setHeaderUnderline (orphanTable);
@@ -191,7 +191,7 @@ CmdCompletionUDAs::CmdCompletionUDAs ()
 int CmdCompletionUDAs::execute (std::string& output)
 {
   std::vector <std::string> udas;
-  for (auto& name : context.config)
+  for (auto& name : Context::getContext().config)
   {
     if (name.first.substr (0, 4) == "uda." &&
         name.first.find (".type") != std::string::npos)

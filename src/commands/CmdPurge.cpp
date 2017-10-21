@@ -33,7 +33,7 @@
 #include <format.h>
 #include <shared.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdPurge::CmdPurge ()
@@ -58,7 +58,7 @@ CmdPurge::CmdPurge ()
 // - child tasks
 void CmdPurge::purgeTask (Task& task, int& count)
 {
-  context.tdb2.purge (task);
+  Context::getContext().tdb2.purge (task);
   handleDeps (task);
   handleChildren (task, count);
   count++;
@@ -71,14 +71,14 @@ void CmdPurge::handleDeps (Task& task)
 {
    std::string uuid = task.get ("uuid");
 
-   for (auto& blockedConst: context.tdb2.all_tasks ())
+   for (auto& blockedConst: Context::getContext().tdb2.all_tasks ())
    {
      Task& blocked = const_cast<Task&>(blockedConst);
      if (blocked.has ("depends") &&
          blocked.get ("depends").find (uuid) != std::string::npos)
      {
          blocked.removeDependency (uuid);
-         context.tdb2.modify (blocked);
+         Context::getContext().tdb2.modify (blocked);
      }
    }
 }
@@ -96,7 +96,7 @@ void CmdPurge::handleChildren (Task& task, int& count)
   std::vector<Task> children;
 
   // Find all child tasks
-  for (auto& childConst: context.tdb2.all_tasks ())
+  for (auto& childConst: Context::getContext().tdb2.all_tasks ())
   {
     Task& child = const_cast<Task&> (childConst);
 
@@ -121,8 +121,8 @@ void CmdPurge::handleChildren (Task& task, int& count)
                                  task.get ("description"),
                                  children.size ());
 
-  if (context.config.getBoolean ("recurrence.confirmation") ||
-      (context.config.get ("recurrence.confirmation") == "prompt"
+  if (Context::getContext().config.getBoolean ("recurrence.confirmation") ||
+      (Context::getContext().config.get ("recurrence.confirmation") == "prompt"
        && confirm (question)))
   {
     for (auto& child: children)
@@ -146,7 +146,7 @@ int CmdPurge::execute (std::string&)
   filter.subset (filtered);
   if (filtered.size () == 0)
   {
-    context.footnote (STRING_FEEDBACK_NO_TASKS_SP);
+    Context::getContext().footnote (STRING_FEEDBACK_NO_TASKS_SP);
     return 1;
   }
 

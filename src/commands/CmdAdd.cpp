@@ -32,7 +32,7 @@
 #include <i18n.h>
 #include <main.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdAdd::CmdAdd ()
@@ -56,29 +56,29 @@ int CmdAdd::execute (std::string& output)
   // Apply the command line modifications to the new task.
   Task task;
   task.modify (Task::modReplace, true);
-  context.tdb2.add (task);
+  Context::getContext().tdb2.add (task);
 
   // Do not display ID 0, users cannot query by that
   auto status = task.getStatus ();
-  if (context.verbose ("new-id") &&
+  if (Context::getContext().verbose ("new-id") &&
       (status == Task::pending ||
        status == Task::waiting))
     output += format (STRING_CMD_ADD_FEEDBACK, task.id) + '\n';
 
-  else if (context.verbose ("new-id") &&
+  else if (Context::getContext().verbose ("new-id") &&
            status == Task::recurring)
     output += format (STRING_CMD_ADD_RECUR, task.id) + '\n';
 
-  else if (context.verbose ("new-uuid") &&
+  else if (Context::getContext().verbose ("new-uuid") &&
            status != Task::recurring)
     output += format (STRING_CMD_ADD_FEEDBACK, task.get ("uuid")) + '\n';
 
-  else if (context.verbose ("new-uuid") &&
+  else if (Context::getContext().verbose ("new-uuid") &&
            status == Task::recurring)
     output += format (STRING_CMD_ADD_RECUR, task.get ("uuid")) + '\n';
 
-  if (context.verbose ("project"))
-    context.footnote (onProjectChange (task));
+  if (Context::getContext().verbose ("project"))
+    Context::getContext().footnote (onProjectChange (task));
 
   return 0;
 }

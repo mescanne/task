@@ -47,7 +47,7 @@
 #include <main.h>
 #include <JSON.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdEdit::CmdEdit ()
@@ -80,7 +80,7 @@ int CmdEdit::execute (std::string&)
 
   if (! filtered.size ())
   {
-    context.footnote (STRING_FEEDBACK_NO_MATCH);
+    Context::getContext().footnote (STRING_FEEDBACK_NO_MATCH);
     return 1;
   }
 
@@ -91,7 +91,7 @@ int CmdEdit::execute (std::string&)
     if (result == CmdEdit::editResult::error)
       break;
     else if (result == CmdEdit::editResult::changes)
-      context.tdb2.modify (task);
+      Context::getContext().tdb2.modify (task);
   }
 
   return 0;
@@ -197,7 +197,7 @@ std::string CmdEdit::formatDuration (
 std::string CmdEdit::formatTask (Task task, const std::string& dateformat)
 {
   std::stringstream before;
-  auto verbose = context.verbose ("edit");
+  auto verbose = Context::getContext().verbose ("edit");
 
   if (verbose)
     before << "# " << STRING_EDIT_HEADER_1 << '\n'
@@ -265,7 +265,7 @@ std::string CmdEdit::formatTask (Task task, const std::string& dateformat)
       allDeps << ",";
 
     Task t;
-    context.tdb2.get (dependencies[i], t);
+    Context::getContext().tdb2.get (dependencies[i], t);
     if (t.getStatus () == Task::pending ||
         t.getStatus () == Task::waiting)
       allDeps << t.id;
@@ -280,8 +280,8 @@ std::string CmdEdit::formatTask (Task task, const std::string& dateformat)
 
   // UDAs
   std::vector <std::string> udas;
-  for (auto& col : context.columns)
-    if (context.config.get ("uda." + col.first + ".type") != "")
+  for (auto& col : Context::getContext().columns)
+    if (Context::getContext().config.get ("uda." + col.first + ".type") != "")
       udas.push_back (col.first);
 
   if (udas.size ())
@@ -295,7 +295,7 @@ std::string CmdEdit::formatTask (Task task, const std::string& dateformat)
       if (pad > 0)
         padding = std::string (pad, ' ');
 
-      std::string type = context.config.get ("uda." + uda + ".type");
+      std::string type = Context::getContext().config.get ("uda." + uda + ".type");
       if (type == "string" || type == "numeric")
         before << "  UDA " << uda << ": " << padding << task.get (uda) << '\n';
       else if (type == "date")
@@ -335,12 +335,12 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (value != "")
     {
-      context.footnote (STRING_EDIT_PROJECT_MOD);
+      Context::getContext().footnote (STRING_EDIT_PROJECT_MOD);
       task.set ("project", value);
     }
     else
     {
-      context.footnote (STRING_EDIT_PROJECT_DEL);
+      Context::getContext().footnote (STRING_EDIT_PROJECT_DEL);
       task.remove ("project");
     }
   }
@@ -356,7 +356,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (value != "")
     {
-      context.footnote (STRING_EDIT_DESC_MOD);
+      Context::getContext().footnote (STRING_EDIT_DESC_MOD);
       task.set ("description", value);
     }
     else
@@ -369,7 +369,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (value != formatDate (task, "entry", dateformat))
     {
-      context.footnote (STRING_EDIT_ENTRY_MOD);
+      Context::getContext().footnote (STRING_EDIT_ENTRY_MOD);
       task.set ("entry", Datetime (value, dateformat).toEpochString ());
     }
   }
@@ -384,13 +384,13 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
     {
       if (value != formatDate (task, "start", dateformat))
       {
-        context.footnote (STRING_EDIT_START_MOD);
+        Context::getContext().footnote (STRING_EDIT_START_MOD);
         task.set ("start", Datetime (value, dateformat).toEpochString ());
       }
     }
     else
     {
-      context.footnote (STRING_EDIT_START_MOD);
+      Context::getContext().footnote (STRING_EDIT_START_MOD);
       task.set ("start", Datetime (value, dateformat).toEpochString ());
     }
   }
@@ -398,7 +398,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (task.get ("start") != "")
     {
-      context.footnote (STRING_EDIT_START_DEL);
+      Context::getContext().footnote (STRING_EDIT_START_DEL);
       task.remove ("start");
     }
   }
@@ -411,7 +411,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
     {
       if (value != formatDate (task, "end", dateformat))
       {
-        context.footnote (STRING_EDIT_END_MOD);
+        Context::getContext().footnote (STRING_EDIT_END_MOD);
         task.set ("end", Datetime (value, dateformat).toEpochString ());
       }
     }
@@ -422,7 +422,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (task.get ("end") != "")
     {
-      context.footnote (STRING_EDIT_END_DEL);
+      Context::getContext().footnote (STRING_EDIT_END_DEL);
       task.setStatus (Task::pending);
       task.remove ("end");
     }
@@ -436,13 +436,13 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
     {
       if (value != formatDate (task, "scheduled", dateformat))
       {
-        context.footnote (STRING_EDIT_SCHED_MOD);
+        Context::getContext().footnote (STRING_EDIT_SCHED_MOD);
         task.set ("scheduled", Datetime (value, dateformat).toEpochString ());
       }
     }
     else
     {
-      context.footnote (STRING_EDIT_SCHED_MOD);
+      Context::getContext().footnote (STRING_EDIT_SCHED_MOD);
       task.set ("scheduled", Datetime (value, dateformat).toEpochString ());
     }
   }
@@ -450,7 +450,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (task.get ("scheduled") != "")
     {
-      context.footnote (STRING_EDIT_SCHED_DEL);
+      Context::getContext().footnote (STRING_EDIT_SCHED_DEL);
       task.remove ("scheduled");
     }
   }
@@ -463,13 +463,13 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
     {
       if (value != formatDate (task, "due", dateformat))
       {
-        context.footnote (STRING_EDIT_DUE_MOD);
+        Context::getContext().footnote (STRING_EDIT_DUE_MOD);
         task.set ("due", Datetime (value, dateformat).toEpochString ());
       }
     }
     else
     {
-      context.footnote (STRING_EDIT_DUE_MOD);
+      Context::getContext().footnote (STRING_EDIT_DUE_MOD);
       task.set ("due", Datetime (value, dateformat).toEpochString ());
     }
   }
@@ -480,11 +480,11 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
       if (task.getStatus () == Task::recurring ||
           task.get ("parent") != "")
       {
-        context.footnote (STRING_EDIT_DUE_DEL_ERR);
+        Context::getContext().footnote (STRING_EDIT_DUE_DEL_ERR);
       }
       else
       {
-        context.footnote (STRING_EDIT_DUE_DEL);
+        Context::getContext().footnote (STRING_EDIT_DUE_DEL);
         task.remove ("due");
       }
     }
@@ -498,13 +498,13 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
     {
       if (value != formatDate (task, "until", dateformat))
       {
-        context.footnote (STRING_EDIT_UNTIL_MOD);
+        Context::getContext().footnote (STRING_EDIT_UNTIL_MOD);
         task.set ("until", Datetime (value, dateformat).toEpochString ());
       }
     }
     else
     {
-      context.footnote (STRING_EDIT_UNTIL_MOD);
+      Context::getContext().footnote (STRING_EDIT_UNTIL_MOD);
       task.set ("until", Datetime (value, dateformat).toEpochString ());
     }
   }
@@ -512,7 +512,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (task.get ("until") != "")
     {
-      context.footnote (STRING_EDIT_UNTIL_DEL);
+      Context::getContext().footnote (STRING_EDIT_UNTIL_DEL);
       task.remove ("until");
     }
   }
@@ -527,7 +527,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
       std::string::size_type idx = 0;
       if (p.parse (value, idx))
       {
-        context.footnote (STRING_EDIT_RECUR_MOD);
+        Context::getContext().footnote (STRING_EDIT_RECUR_MOD);
         if (task.get ("due") != "")
         {
           task.set ("recur", value);
@@ -541,7 +541,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
     }
     else
     {
-      context.footnote (STRING_EDIT_RECUR_DEL);
+      Context::getContext().footnote (STRING_EDIT_RECUR_DEL);
       task.setStatus (Task::pending);
       task.remove ("recur");
       task.remove ("until");
@@ -558,14 +558,14 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
     {
       if (value != formatDate (task, "wait", dateformat))
       {
-        context.footnote (STRING_EDIT_WAIT_MOD);
+        Context::getContext().footnote (STRING_EDIT_WAIT_MOD);
         task.set ("wait", Datetime (value, dateformat).toEpochString ());
         task.setStatus (Task::waiting);
       }
     }
     else
     {
-      context.footnote (STRING_EDIT_WAIT_MOD);
+      Context::getContext().footnote (STRING_EDIT_WAIT_MOD);
       task.set ("wait", Datetime (value, dateformat).toEpochString ());
       task.setStatus (Task::waiting);
     }
@@ -574,7 +574,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (task.get ("wait") != "")
     {
-      context.footnote (STRING_EDIT_WAIT_DEL);
+      Context::getContext().footnote (STRING_EDIT_WAIT_DEL);
       task.remove ("wait");
       task.setStatus (Task::pending);
     }
@@ -586,12 +586,12 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   {
     if (value != "")
     {
-      context.footnote (STRING_EDIT_PARENT_MOD);
+      Context::getContext().footnote (STRING_EDIT_PARENT_MOD);
       task.set ("parent", value);
     }
     else
     {
-      context.footnote (STRING_EDIT_PARENT_DEL);
+      Context::getContext().footnote (STRING_EDIT_PARENT_DEL);
       task.remove ("parent");
     }
   }
@@ -655,9 +655,9 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
   }
 
   // UDAs
-  for (auto& col : context.columns)
+  for (auto& col : Context::getContext().columns)
   {
-    auto type = context.config.get ("uda." + col.first + ".type");
+    auto type = Context::getContext().config.get ("uda." + col.first + ".type");
     if (type != "")
     {
       auto value = findValue (after, "\n  UDA " + col.first + ":");
@@ -668,7 +668,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
       {
         if (value != "")
         {
-          context.footnote (format (STRING_EDIT_UDA_MOD, col.first));
+          Context::getContext().footnote (format (STRING_EDIT_UDA_MOD, col.first));
 
           if (type == "string")
           {
@@ -695,7 +695,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
         }
         else
         {
-          context.footnote (format (STRING_EDIT_UDA_DEL, col.first));
+          Context::getContext().footnote (format (STRING_EDIT_UDA_DEL, col.first));
           task.remove (col.first);
         }
       }
@@ -723,7 +723,7 @@ void CmdEdit::parseTask (Task& task, const std::string& after, const std::string
 CmdEdit::editResult CmdEdit::editFile (Task& task)
 {
   // Check for file permissions.
-  Directory location (context.config.get ("data.location"));
+  Directory location (Context::getContext().config.get ("data.location"));
   if (! location.writable ())
     throw std::string (STRING_EDIT_UNWRITABLE);
 
@@ -734,9 +734,9 @@ CmdEdit::editResult CmdEdit::editFile (Task& task)
   // Determine the output date format, which uses a hierarchy of definitions.
   //   rc.dateformat.edit
   //   rc.dateformat
-  auto dateformat = context.config.get ("dateformat.edit");
+  auto dateformat = Context::getContext().config.get ("dateformat.edit");
   if (dateformat == "")
-    dateformat = context.config.get ("dateformat");
+    dateformat = Context::getContext().config.get ("dateformat");
 
   // Change directory for the editor
   auto current_dir = Directory::cwd ();
@@ -754,7 +754,7 @@ CmdEdit::editResult CmdEdit::editFile (Task& task)
   File::write (file.str (), before);
 
   // Determine correct editor: .taskrc:editor > $VISUAL > $EDITOR > vi
-  auto editor = context.config.get ("editor");
+  auto editor = Context::getContext().config.get ("editor");
   char* peditor = getenv ("VISUAL");
   if (editor == "" && peditor) editor = std::string (peditor);
   peditor = getenv ("EDITOR");

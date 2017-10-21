@@ -47,7 +47,7 @@
 #include <main.h>
 
 // Global context for use by all.
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Scans all tasks, and for any recurring tasks, determines whether any new
@@ -61,10 +61,10 @@ void handleRecurrence ()
 
   // Recurrence can be disabled.
   // Note: This is currently a workaround for TD-44, TW-1520.
-  if (! context.config.getBoolean ("recurrence"))
+  if (! Context::getContext().config.getBoolean ("recurrence"))
     return;
 
-  auto tasks = context.tdb2.pending.get_tasks ();
+  auto tasks = Context::getContext().tdb2.pending.get_tasks ();
   Datetime now;
 
   // Look at all tasks and find any recurring ones.
@@ -79,8 +79,8 @@ void handleRecurrence ()
       {
         // Determine the end date.
         t.setStatus (Task::deleted);
-        context.tdb2.modify (t);
-        context.footnote (onExpiration (t));
+        Context::getContext().tdb2.modify (t);
+        Context::getContext().footnote (onExpiration (t));
         continue;
       }
 
@@ -98,7 +98,7 @@ void handleRecurrence ()
 
           Task rec (t);                          // Clone the parent.
           rec.setStatus (Task::pending);         // Change the status.
-          rec.id = context.tdb2.next_id ();      // New ID.
+          rec.id = Context::getContext().tdb2.next_id ();      // New ID.
           rec.set ("uuid", uuid ());             // New UUID.
           rec.set ("parent", t.get ("uuid"));    // Remember mom.
           rec.setAsNow ("entry");                // New entry date.
@@ -123,7 +123,7 @@ void handleRecurrence ()
           rec.remove ("mask");                   // Remove the mask of the parent.
 
           // Add the new task to the DB.
-          context.tdb2.add (rec);
+          Context::getContext().tdb2.add (rec);
         }
 
         ++i;
@@ -133,10 +133,10 @@ void handleRecurrence ()
       if (changed)
       {
         t.set ("mask", mask);
-        context.tdb2.modify (t);
+        Context::getContext().tdb2.modify (t);
 
-        if (context.verbose ("recur"))
-          context.footnote (format (STRING_RECUR_CREATE, t.get ("description")));
+        if (Context::getContext().verbose ("recur"))
+          Context::getContext().footnote (format (STRING_RECUR_CREATE, t.get ("description")));
       }
     }
   }
@@ -164,7 +164,7 @@ bool generateDueDates (Task& parent, std::vector <Datetime>& allDue)
     specificEnd = true;
   }
 
-  auto recurrence_limit = context.config.getInteger ("recurrence.limit");
+  auto recurrence_limit = Context::getContext().config.getInteger ("recurrence.limit");
   int recurrence_counter = 0;
   Datetime now;
   for (Datetime i = due; ; i = getNextRecurrence (i, recur))
@@ -375,7 +375,7 @@ void updateRecurrenceMask (Task& task)
   Task parent;
 
   if (uuid != "" &&
-      context.tdb2.get (uuid, parent))
+      Context::getContext().tdb2.get (uuid, parent))
   {
     unsigned int index = strtol (task.get ("imask").c_str (), NULL, 10);
     auto mask = parent.get ("mask");
@@ -401,7 +401,7 @@ void updateRecurrenceMask (Task& task)
     }
 
     parent.set ("mask", mask);
-    context.tdb2.modify (parent);
+    Context::getContext().tdb2.modify (parent);
   }
 }
 

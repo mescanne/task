@@ -38,7 +38,7 @@
 #include <i18n.h>
 #include <main.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdSummary::CmdSummary ()
@@ -63,7 +63,7 @@ CmdSummary::CmdSummary ()
 int CmdSummary::execute (std::string& output)
 {
   int rc = 0;
-  bool showAllProjects = context.config.getBoolean ("summary.all.projects");
+  bool showAllProjects = Context::getContext().config.getBoolean ("summary.all.projects");
 
   // Apply filter.
   handleUntil ();
@@ -133,7 +133,7 @@ int CmdSummary::execute (std::string& output)
 
   // Create a table for output.
   Table view;
-  view.width (context.getWidth ());
+  view.width (Context::getContext().getWidth ());
   view.add (STRING_CMD_SUMMARY_PROJECT);
   view.add (STRING_CMD_SUMMARY_REMAINING, false);
   view.add (STRING_CMD_SUMMARY_AVG_AGE,   false);
@@ -143,10 +143,10 @@ int CmdSummary::execute (std::string& output)
 
   Color bar_color;
   Color bg_color;
-  if (context.color ())
+  if (Context::getContext().color ())
   {
-    bar_color = Color (context.config.get ("color.summary.bar"));
-    bg_color  = Color (context.config.get ("color.summary.background"));
+    bar_color = Color (Context::getContext().config.get ("color.summary.bar"));
+    bg_color  = Color (Context::getContext().config.get ("color.summary.background"));
   }
 
   int barWidth = 30;
@@ -184,7 +184,7 @@ int CmdSummary::execute (std::string& output)
 
       std::string bar;
       std::string subbar;
-      if (context.color ())
+      if (Context::getContext().color ())
       {
         bar += bar_color.colorize (std::string (           completedBar, ' '));
         bar += bg_color.colorize  (std::string (barWidth - completedBar, ' '));

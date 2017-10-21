@@ -1297,3 +1297,14 @@ void Context::debug (const std::string& input)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+Context* Context::context;
+
+Context& Context::getContext() {
+  return *Context::context;
+}
+
+void Context::setContext(Context* context) {
+  Context::context = context;
+}
+

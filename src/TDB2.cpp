@@ -43,7 +43,7 @@
 #include <main.h>
 #include <util.h>
 
-extern Context context;
+
 
 bool TDB2::debug_mode = false;
 
@@ -171,7 +171,7 @@ void TF2::add_task (Task& task)
   _added_tasks.push_back (task);     // For commit/synch
 
   // For faster lookup
-  if (context.cli2.getCommand () == "import")
+  if (Context::getContext().cli2.getCommand () == "import")
     _tasks_map.insert (std::pair<std::string, Task> (task.get("uuid"), task));
 
   Task::status status = task.getStatus ();
@@ -180,7 +180,7 @@ void TF2::add_task (Task& task)
        status == Task::recurring ||
        status == Task::waiting))
   {
-    task.id = context.tdb2.next_id ();
+    task.id = Context::getContext().tdb2.next_id ();
   }
 
   _I2U[task.id] = task.get ("uuid");
@@ -194,7 +194,7 @@ bool TF2::modify_task (const Task& task)
 {
   std::string uuid = task.get ("uuid");
 
-  if (context.cli2.getCommand () == "import")
+  if (Context::getContext().cli2.getCommand () == "import")
   {
     // Update map used for faster lookup
     auto i = _tasks_map.find (uuid);
@@ -270,7 +270,7 @@ void TF2::commit ()
     {
       if (_file.open ())
       {
-        if (context.config.getBoolean ("locking"))
+        if (Context::getContext().config.getBoolean ("locking"))
           _file.lock ();
 
         // Write out all the added tasks.
@@ -292,7 +292,7 @@ void TF2::commit ()
     {
       if (_file.open ())
       {
-        if (context.config.getBoolean ("locking"))
+        if (Context::getContext().config.getBoolean ("locking"))
           _file.lock ();
 
         // Truncate the file and rewrite.
@@ -327,9 +327,9 @@ Task TF2::load_task (const std::string& line)
   {
     Task::status status = task.getStatus ();
     // Completed / deleted tasks in pending.data get an ID if GC is off.
-    if (! context.run_gc ||
+    if (! Context::getContext().run_gc ||
         (status != Task::completed && status != Task::deleted))
-      task.id = context.tdb2.next_id ();
+      task.id = Context::getContext().tdb2.next_id ();
   }
 
   // Maintain mapping for ease of link/dependency resolution.
@@ -355,7 +355,7 @@ void TF2::load_gc (Task& task)
   if (status == "pending" ||
       status == "recurring")
   {
-    context.tdb2.pending._tasks.push_back (task);
+    Context::getContext().tdb2.pending._tasks.push_back (task);
   }
   else if (status == "waiting")
   {
@@ -366,17 +366,17 @@ void TF2::load_gc (Task& task)
       task.remove ("wait");
       // Unwaiting pending tasks is the only case not caught by the size()
       // checks in TDB2::gc(), so we need to signal it here.
-      context.tdb2.pending._dirty = true;
+      Context::getContext().tdb2.pending._dirty = true;
 
-      if (context.verbose ("unwait"))
-        context.footnote (format (STRING_TDB2_UNWAIT, task.get ("description")));
+      if (Context::getContext().verbose ("unwait"))
+        Context::getContext().footnote (format (STRING_TDB2_UNWAIT, task.get ("description")));
     }
 
-    context.tdb2.pending._tasks.push_back (task);
+    Context::getContext().tdb2.pending._tasks.push_back (task);
   }
   else
   {
-    context.tdb2.completed._tasks.push_back (task);
+    Context::getContext().tdb2.completed._tasks.push_back (task);
   }
 }
 
@@ -411,7 +411,7 @@ void TF2::load_tasks (bool from_gc /* = false */)
       else
         _tasks.push_back (task);
 
-      if (context.cli2.getCommand () == "import")  // For faster lookup only
+      if (Context::getContext().cli2.getCommand () == "import")  // For faster lookup only
         _tasks_map.insert (std::pair<std::string, Task> (task.get("uuid"), task));
     }
 
@@ -427,7 +427,7 @@ void TF2::load_tasks (bool from_gc /* = false */)
     throw e + format (STRING_TDB2_PARSE_ERROR, _file._data, line_number);
   }
 
-  context.time_load_us += timer.total_us ();
+  Context::getContext().time_load_us += timer.total_us ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -435,7 +435,7 @@ void TF2::load_lines ()
 {
   if (_file.open ())
   {
-    if (context.config.getBoolean ("locking"))
+    if (Context::getContext().config.getBoolean ("locking"))
       _file.lock ();
 
     _file.read (_lines);
@@ -645,7 +645,7 @@ void TDB2::add (Task& task, bool add_to_backlog /* = true */)
   // Only locally-added tasks trigger hooks.  This means that tasks introduced
   // via 'sync' do not trigger hooks.
   if (add_to_backlog)
-    context.hooks.onAdd (task);
+    Context::getContext().hooks.onAdd (task);
 
   update (task, add_to_backlog, true);
 }
@@ -662,7 +662,7 @@ void TDB2::modify (Task& task, bool add_to_backlog /* = true */)
   {
     Task original;
     get (uuid, original);
-    context.hooks.onModify (original, task);
+    Context::getContext().hooks.onModify (original, task);
   }
 
   update (task, add_to_backlog);
@@ -764,7 +764,7 @@ void TDB2::commit ()
   signal (SIGUSR1,   SIG_DFL);
   signal (SIGUSR2,   SIG_DFL);
 
-  context.time_commit_us += timer.total_us ();
+  Context::getContext().time_commit_us += timer.total_us ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -803,7 +803,7 @@ void TDB2::revert ()
 
   // Display diff and confirm.
   show_diff (current, prior, when);
-  if (! context.config.getBoolean ("confirmation") ||
+  if (! Context::getContext().config.getBoolean ("confirmation") ||
       confirm (STRING_TDB2_UNDO_CONFIRM))
   {
     // There are six kinds of change possible.  Determine which one, and act
@@ -914,7 +914,7 @@ void TDB2::revert_pending (
   {
     if (task->find (uuid_att) != std::string::npos)
     {
-      context.debug ("TDB::revert - task found in pending.data");
+      Context::getContext().debug ("TDB::revert - task found in pending.data");
 
       // Either revert if there was a prior state, or remove the task.
       if (prior != "")
@@ -947,7 +947,7 @@ void TDB2::revert_completed (
   {
     if (task->find (uuid_att) != std::string::npos)
     {
-      context.debug ("TDB::revert_completed - task found in completed.data");
+      Context::getContext().debug ("TDB::revert_completed - task found in completed.data");
 
       // Either revert if there was a prior state, or remove the task.
       if (prior != "")
@@ -960,12 +960,12 @@ void TDB2::revert_completed (
           c.erase (task);
           p.push_back (prior);
           std::cout << STRING_TDB2_REVERTED << '\n';
-          context.debug ("TDB::revert_completed - task belongs in pending.data");
+          Context::getContext().debug ("TDB::revert_completed - task belongs in pending.data");
         }
         else
         {
           std::cout << STRING_TDB2_REVERTED << '\n';
-          context.debug ("TDB::revert_completed - task belongs in completed.data");
+          Context::getContext().debug ("TDB::revert_completed - task belongs in completed.data");
         }
       }
       else
@@ -973,7 +973,7 @@ void TDB2::revert_completed (
         c.erase (task);
 
         std::cout << STRING_TDB2_REVERTED << '\n';
-        context.debug ("TDB::revert_completed - task removed");
+        Context::getContext().debug ("TDB::revert_completed - task removed");
       }
 
       std::cout << STRING_TDB2_UNDO_COMPLETE << '\n';
@@ -996,7 +996,7 @@ void TDB2::revert_backlog (
   {
     if (task->find (uuid_att) != std::string::npos)
     {
-      context.debug ("TDB::revert_backlog - task found in backlog.data");
+      Context::getContext().debug ("TDB::revert_backlog - task found in backlog.data");
       found = true;
 
       // If this is a new task (no prior), then just remove it from the backlog.
@@ -1031,10 +1031,10 @@ void TDB2::show_diff (
   Datetime lastChange (strtol (when.c_str (), NULL, 10));
 
   // Set the colors.
-  Color color_red   (context.color () ? context.config.get ("color.undo.before") : "");
-  Color color_green (context.color () ? context.config.get ("color.undo.after") : "");
+  Color color_red   (Context::getContext().color () ? Context::getContext().config.get ("color.undo.before") : "");
+  Color color_green (Context::getContext().color () ? Context::getContext().config.get ("color.undo.after") : "");
 
-  if (context.config.get ("undo.style") == "side")
+  if (Context::getContext().config.get ("undo.style") == "side")
   {
     std::cout << '\n'
               << format (STRING_TDB2_LAST_MOD, lastChange.toString ())
@@ -1043,7 +1043,7 @@ void TDB2::show_diff (
     // Attributes are all there is, so figure the different attribute names
     // between before and after.
     Table view;
-    view.width (context.getWidth ());
+    view.width (Context::getContext().getWidth ());
     view.intraPadding (2);
     view.add ("");
     view.add (STRING_TDB2_UNDO_PRIOR);
@@ -1128,7 +1128,7 @@ void TDB2::show_diff (
   // - name:
   // + name: new           // att added
   //
-  else if (context.config.get ("undo.style") == "diff")
+  else if (Context::getContext().config.get ("undo.style") == "diff")
   {
     // Create reference tasks.
     Task before;
@@ -1139,7 +1139,7 @@ void TDB2::show_diff (
 
     // Generate table header.
     Table view;
-    view.width (context.getWidth ());
+    view.width (Context::getContext().getWidth ());
     view.intraPadding (2);
     view.add ("");
     view.add ("");
@@ -1151,13 +1151,13 @@ void TDB2::show_diff (
     row = view.addRow ();
     view.set (row, 0, STRING_TDB2_DIFF_CURR, color_green);  // Note trailing space.
     view.set (row, 1, format (STRING_TDB2_DIFF_CURR_DESC,
-                              lastChange.toString (context.config.get ("dateformat"))),
+                              lastChange.toString (Context::getContext().config.get ("dateformat"))),
                       color_green);
 
     view.addRow ();
 
     // Add rows to table showing diffs.
-    std::vector <std::string> all = context.getColumns ();
+    std::vector <std::string> all = Context::getContext().getColumns ();
 
     // Now factor in the annotation attributes.
     for (auto& it : before.data)
@@ -1252,7 +1252,7 @@ void TDB2::gc ()
   Timer timer;
 
   // Allowed as an override, but not recommended.
-  if (context.config.getBoolean ("gc"))
+  if (Context::getContext().config.getBoolean ("gc"))
   {
     // Load pending, check whether completed changes size
     auto size_before = completed._tasks.size ();
@@ -1286,7 +1286,7 @@ void TDB2::gc ()
       completed.dependency_scan ();
   }
 
-  context.time_gc_us += timer.total_us ();
+  Context::getContext().time_gc_us += timer.total_us ();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1463,13 +1463,13 @@ void TDB2::clear ()
 ////////////////////////////////////////////////////////////////////////////////
 void TDB2::dump ()
 {
-  if (context.config.getBoolean ("debug"))
+  if (Context::getContext().config.getBoolean ("debug"))
   {
-    context.debug (pending.dump ());
-    context.debug (completed.dump ());
-    context.debug (undo.dump ());
-    context.debug (backlog.dump ());
-    context.debug (" ");
+    Context::getContext().debug (pending.dump ());
+    Context::getContext().debug (completed.dump ());
+    Context::getContext().debug (undo.dump ());
+    Context::getContext().debug (backlog.dump ());
+    Context::getContext().debug (" ");
   }
 }
 

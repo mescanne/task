@@ -34,7 +34,7 @@
 #include <i18n.h>
 #include <main.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ViewTask::ViewTask ()
@@ -113,8 +113,8 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
 {
   Timer timer;
 
-  bool const obfuscate           = context.config.getBoolean ("obfuscate");
-  bool const print_empty_columns = context.config.getBoolean ("print.empty.columns");
+  bool const obfuscate           = Context::getContext().config.getBoolean ("obfuscate");
+  bool const print_empty_columns = Context::getContext().config.getBoolean ("print.empty.columns");
   std::vector <Column*> nonempty_columns;
   std::vector <bool> nonempty_sort;
 
@@ -191,7 +191,7 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
 
   // Calculate final column widths.
   int overage = _width - sum_minimal - all_extra;
-  context.debug (format ("ViewTask::render min={1} ideal={2} overage={3} width={4}", 
+  Context::getContext().debug (format ("ViewTask::render min={1} ideal={2} overage={3} width={4}", 
                          sum_minimal + all_extra,
                          sum_ideal + all_extra,
                          overage,
@@ -208,7 +208,7 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
   // Not enough for minimum.
   else if (overage < 0)
   {
-    context.error (format (STRING_VIEW_TOO_SMALL, sum_minimal + all_extra, _width));
+    Context::getContext().error (format (STRING_VIEW_TOO_SMALL, sum_minimal + all_extra, _width));
     widths = minimal;
   }
 
@@ -257,10 +257,10 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
   std::string extra       = std::string (_extra_padding, ' ');
   std::string intra       = std::string (_intra_padding, ' ');
 
-  std::string extra_odd   = context.color () ? _extra_odd.colorize  (extra) : extra;
-  std::string extra_even  = context.color () ? _extra_even.colorize (extra) : extra;
-  std::string intra_odd   = context.color () ? _intra_odd.colorize  (intra) : intra;
-  std::string intra_even  = context.color () ? _intra_even.colorize (intra) : intra;
+  std::string extra_odd   = Context::getContext().color () ? _extra_odd.colorize  (extra) : extra;
+  std::string extra_even  = Context::getContext().color () ? _extra_even.colorize (extra) : extra;
+  std::string intra_odd   = Context::getContext().color () ? _intra_odd.colorize  (intra) : intra;
+  std::string intra_even  = Context::getContext().color () ? _intra_even.colorize (intra) : intra;
 
   std::string out;
   _lines = 0;
@@ -288,7 +288,7 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
     // Stop if the line limit is exceeded.
     if (++_lines >= _truncate_lines && _truncate_lines != 0)
     {
-      context.time_render_us += timer.total_us ();
+      Context::getContext().time_render_us += timer.total_us ();
       return out;
     }
   }
@@ -307,7 +307,7 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
     // Alternate rows based on |s % 2|
     bool odd = (s % 2) ? true : false;
     Color row_color;
-    if (context.color ())
+    if (Context::getContext().color ())
     {
       row_color = odd ? _odd : _even;
       row_color.blend (rule_color);
@@ -374,7 +374,7 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
       // Stop if the line limit is exceeded.
       if (++_lines >= _truncate_lines && _truncate_lines != 0)
       {
-        context.time_render_us += timer.total_us ();
+        Context::getContext().time_render_us += timer.total_us ();
         return out;
       }
     }
@@ -384,12 +384,12 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
     // Stop if the row limit is exceeded.
     if (++_rows >= _truncate_rows && _truncate_rows != 0)
     {
-      context.time_render_us += timer.total_us ();
+      Context::getContext().time_render_us += timer.total_us ();
       return out;
     }
   }
 
-  context.time_render_us += timer.total_us ();
+  Context::getContext().time_render_us += timer.total_us ();
   return out;
 }
 

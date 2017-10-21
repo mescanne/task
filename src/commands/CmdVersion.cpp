@@ -36,7 +36,7 @@
 #include <format.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdVersion::CmdVersion ()
@@ -60,7 +60,7 @@ int CmdVersion::execute (std::string& output)
   std::stringstream out;
 
   // Create a table for the disclaimer.
-  int width = context.getWidth ();
+  int width = Context::getContext().getWidth ();
   Table disclaimer;
   disclaimer.width (width);
   disclaimer.add ("");
@@ -73,7 +73,7 @@ int CmdVersion::execute (std::string& output)
   link.set (link.addRow (), 0, STRING_CMD_VERSION_DOCS);
 
   Color bold;
-  if (context.color ())
+  if (Context::getContext().color ())
     bold = Color ("bold");
 
   out << '\n'

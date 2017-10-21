@@ -34,7 +34,7 @@
 #include <i18n.h>
 #include <main.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdDone::CmdDone ()
@@ -64,7 +64,7 @@ int CmdDone::execute (std::string&)
   filter.subset (filtered);
   if (filtered.size () == 0)
   {
-    context.footnote (STRING_FEEDBACK_NO_TASKS_SP);
+    Context::getContext().footnote (STRING_FEEDBACK_NO_TASKS_SP);
     return 1;
   }
 
@@ -93,21 +93,21 @@ int CmdDone::execute (std::string&)
       if (task.has ("start"))
       {
         task.remove ("start");
-        if (context.config.getBoolean ("journal.time"))
-          task.addAnnotation (context.config.get ("journal.time.stop.annotation"));
+        if (Context::getContext().config.getBoolean ("journal.time"))
+          task.addAnnotation (Context::getContext().config.get ("journal.time.stop.annotation"));
       }
 
       if (permission (taskDifferences (before, task) + question, filtered.size ()))
       {
         updateRecurrenceMask (task);
-        context.tdb2.modify (task);
+        Context::getContext().tdb2.modify (task);
         ++count;
         feedback_affected (STRING_CMD_DONE_TASK, task);
         feedback_unblocked (task);
         if (!nagged)
           nagged = nag (task);
         dependencyChainOnComplete (task);
-        if (context.verbose ("project"))
+        if (Context::getContext().verbose ("project"))
           projectChanges[task.get ("project")] = onProjectChange (task);
       }
       else
@@ -131,7 +131,7 @@ int CmdDone::execute (std::string&)
   // Now list the project changes.
   for (const auto& change : projectChanges)
     if (change.first != "")
-      context.footnote (change.second);
+      Context::getContext().footnote (change.second);
 
   feedback_affected (count == 1 ? STRING_CMD_DONE_1 : STRING_CMD_DONE_N, count);
   return rc;

@@ -33,7 +33,7 @@
 #include <format.h>
 #include <i18n.h>
 
-extern Context context;
+
 extern Task& contextTask;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ void ColumnTypeNumeric::modify (Task& task, const std::string& value)
   }
 
   std::string label = "  [1;37;43mMODIFICATION[0m ";
-  context.debug (label + _name + " <-- '" + evaluatedValue.get_string () + "' <-- '" + value + '\'');
+  Context::getContext().debug (label + _name + " <-- '" + evaluatedValue.get_string () + "' <-- '" + value + '\'');
 
   // If the result is not readily convertible to a numeric value, then this is
   // an error.

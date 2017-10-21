@@ -31,7 +31,7 @@
 #include <main.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdExport::CmdExport ()
@@ -69,11 +69,11 @@ int CmdExport::execute (std::string& output)
   // Obey 'limit:N'.
   int rows = 0;
   int lines = 0;
-  context.getLimits (rows, lines);
+  Context::getContext().getLimits (rows, lines);
   int limit = (rows > lines ? rows : lines);
 
   // Is output contained within a JSON array?
-  bool json_array = context.config.getBoolean ("json.array");
+  bool json_array = Context::getContext().config.getBoolean ("json.array");
 
   // Compose output.
   if (json_array)
@@ -102,7 +102,7 @@ int CmdExport::execute (std::string& output)
   if (json_array)
     output += "]\n";
 
-  context.time_render_us += timer.total_us ();
+  Context::getContext().time_render_us += timer.total_us ();
   return rc;
 }
 

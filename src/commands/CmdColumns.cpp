@@ -35,7 +35,7 @@
 #include <i18n.h>
 #include <main.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdColumns::CmdColumns ()
@@ -58,20 +58,20 @@ int CmdColumns::execute (std::string& output)
 {
   // Obtain the arguments from the description.  That way, things like '--'
   // have already been handled.
-  auto words = context.cli2.getWords ();
+  auto words = Context::getContext().cli2.getWords ();
   if (words.size () > 1)
     throw std::string (STRING_CMD_COLUMNS_ARGS);
 
   // Include all columns in the table.
   std::vector <std::string> names;
-  for (const auto& col : context.columns)
+  for (const auto& col : Context::getContext().columns)
     names.push_back (col.first);
 
   std::sort (names.begin (), names.end ());
 
   // Render a list of column names, formats and examples.
   Table formats;
-  formats.width (context.getWidth ());
+  formats.width (Context::getContext().getWidth ());
   formats.add (STRING_COLUMN_LABEL_COLUMN);
   formats.add (STRING_COLUMN_LABEL_TYPE);
   formats.add (STRING_COLUMN_LABEL_MODIFY);
@@ -84,15 +84,15 @@ int CmdColumns::execute (std::string& output)
     if (words.size () == 0 ||
         find (name, words[0], false) != std::string::npos)
     {
-      auto styles   = context.columns[name]->styles ();
-      auto examples = context.columns[name]->examples ();
+      auto styles   = Context::getContext().columns[name]->styles ();
+      auto examples = Context::getContext().columns[name]->examples ();
 
       for (unsigned int i = 0; i < styles.size (); ++i)
       {
         auto row = formats.addRow ();
         formats.set (row, 0, i == 0 ? name : "");
-        formats.set (row, 1, i == 0 ? context.columns[name]->type () : "");
-        formats.set (row, 2, i == 0 ? (context.columns[name]->modifiable () ? STRING_COLUMN_LABEL_MODIFY : STRING_COLUMN_LABEL_NOMODIFY) : "");
+        formats.set (row, 1, i == 0 ? Context::getContext().columns[name]->type () : "");
+        formats.set (row, 2, i == 0 ? (Context::getContext().columns[name]->modifiable () ? STRING_COLUMN_LABEL_MODIFY : STRING_COLUMN_LABEL_NOMODIFY) : "");
         formats.set (row, 3, styles[i] + (i == 0 ? "*" : ""));
         formats.set (row, 4, i < examples.size () ? examples[i] : "");
       }
@@ -139,7 +139,7 @@ int CmdCompletionColumns::execute (std::string& output)
 {
   // Include all columns.
   std::vector <std::string> names;
-  for (const auto& col : context.columns)
+  for (const auto& col : Context::getContext().columns)
     names.push_back (col.first);
 
   std::sort (names.begin (), names.end ());

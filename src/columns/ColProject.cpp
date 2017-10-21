@@ -37,7 +37,7 @@
 #include <util.h>
 #include <i18n.h>
 
-extern Context context;
+
 extern Task& contextTask;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ ColumnProject::ColumnProject ()
   _examples  = {STRING_COLUMN_EXAMPLES_PROJ,
                 STRING_COLUMN_EXAMPLES_PAR,
                 STRING_COLUMN_EXAMPLES_IND};
-  _hyphenate = context.config.getBoolean ("hyphenate");
+  _hyphenate = Context::getContext().config.getBoolean ("hyphenate");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ void ColumnProject::modify (Task& task, const std::string& value)
       Variant v;
       e.evaluateInfixExpression (value, v);
       task.set (_name, (std::string) v);
-      context.debug (label + _name + " <-- '" + (std::string) v + "' <-- '" + value + '\'');
+      Context::getContext().debug (label + _name + " <-- '" + (std::string) v + "' <-- '" + value + '\'');
     }
     catch (const std::string& e)
     {
@@ -137,7 +137,7 @@ void ColumnProject::modify (Task& task, const std::string& value)
       if (e == STRING_EVAL_NOT_EXPRESSION)
       {
         task.set (_name, value);
-        context.debug (label + _name + " <-- '" + value + '\'');
+        Context::getContext().debug (label + _name + " <-- '" + value + '\'');
       }
       else
         throw;
@@ -146,7 +146,7 @@ void ColumnProject::modify (Task& task, const std::string& value)
   else
   {
     task.set (_name, value);
-    context.debug (label + _name + " <-- '" + value + '\'');
+    Context::getContext().debug (label + _name + " <-- '" + value + '\'');
   }
 }
 

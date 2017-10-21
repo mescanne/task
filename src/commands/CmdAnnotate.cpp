@@ -34,7 +34,7 @@
 #include <format.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdAnnotate::CmdAnnotate ()
@@ -64,7 +64,7 @@ int CmdAnnotate::execute (std::string&)
   filter.subset (filtered);
   if (filtered.size () == 0)
   {
-    context.footnote (STRING_FEEDBACK_NO_TASKS_SP);
+    Context::getContext().footnote (STRING_FEEDBACK_NO_TASKS_SP);
     return 1;
   }
 
@@ -86,33 +86,33 @@ int CmdAnnotate::execute (std::string&)
 
     if (permission (taskDifferences (before, task) + question, filtered.size ()))
     {
-      context.tdb2.modify (task);
+      Context::getContext().tdb2.modify (task);
       ++count;
       feedback_affected (STRING_CMD_ANNO_TASK, task);
-      if (context.verbose ("project"))
+      if (Context::getContext().verbose ("project"))
         projectChanges[task.get ("project")] = onProjectChange (task, false);
 
       // Annotate siblings.
       if (task.has ("parent"))
       {
-        if ((context.config.get ("recurrence.confirmation") == "prompt"
+        if ((Context::getContext().config.get ("recurrence.confirmation") == "prompt"
              && confirm (STRING_CMD_ANNO_CONFIRM_R)) ||
-            context.config.getBoolean ("recurrence.confirmation"))
+            Context::getContext().config.getBoolean ("recurrence.confirmation"))
         {
-          auto siblings = context.tdb2.siblings (task);
+          auto siblings = Context::getContext().tdb2.siblings (task);
           for (auto& sibling : siblings)
           {
             sibling.modify (Task::modAnnotate, true);
-            context.tdb2.modify (sibling);
+            Context::getContext().tdb2.modify (sibling);
             ++count;
             feedback_affected (STRING_CMD_ANNO_TASK_R, sibling);
           }
 
           // Annotate the parent
           Task parent;
-          context.tdb2.get (task.get ("parent"), parent);
+          Context::getContext().tdb2.get (task.get ("parent"), parent);
           parent.modify (Task::modAnnotate, true);
-          context.tdb2.modify (parent);
+          Context::getContext().tdb2.modify (parent);
         }
       }
     }
@@ -128,7 +128,7 @@ int CmdAnnotate::execute (std::string&)
   // Now list the project changes.
   for (const auto& change : projectChanges)
     if (change.first != "")
-      context.footnote (change.second);
+      Context::getContext().footnote (change.second);
 
   feedback_affected (count == 1 ? STRING_CMD_ANNO_1 : STRING_CMD_ANNO_N, count);
   return rc;

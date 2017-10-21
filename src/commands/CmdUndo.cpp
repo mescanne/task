@@ -30,7 +30,7 @@
 #include <Filter.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdUndo::CmdUndo ()
@@ -51,7 +51,7 @@ CmdUndo::CmdUndo ()
 ////////////////////////////////////////////////////////////////////////////////
 int CmdUndo::execute (std::string&)
 {
-  context.tdb2.revert ();
+  Context::getContext().tdb2.revert ();
   return 0;
 }
 

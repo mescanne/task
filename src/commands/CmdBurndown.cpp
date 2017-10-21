@@ -41,7 +41,7 @@
 #include <shared.h>
 #include <format.h>
 
-extern Context context;
+
 
 // Helper macro.
 #define LOC(y,x) (((y) * (_width + 1)) + (x))
@@ -175,8 +175,8 @@ Chart::Chart (char type)
 {
   // How much space is there to render in?  This chart will occupy the
   // maximum space, and the width drives various other parameters.
-  _width = context.getWidth ();
-  _height = context.getHeight () - 1;  // Allow for new line with prompt.
+  _width = Context::getContext().getWidth ();
+  _height = Context::getContext().getHeight () - 1;  // Allow for new line with prompt.
   _max_value = 0;
   _max_label = 1;
   _graph_height = _height - 7;
@@ -194,7 +194,7 @@ Chart::Chart (char type)
   _net_fix_rate = 0.0;
 
   // Set the title.
-  std::vector <std::string> words = context.cli2.getWords ();
+  std::vector <std::string> words = Context::getContext().cli2.getWords ();
   auto filter = join (" ", words);
   _title = '(' + filter + ')';
 }
@@ -397,7 +397,7 @@ std::string Chart::render ()
   }
 
   if (_max_value == 0)
-    context.footnote (STRING_FEEDBACK_NO_MATCH);
+    Context::getContext().footnote (STRING_FEEDBACK_NO_MATCH);
 
   // Create a grid, folded into a string.
   _grid = "";
@@ -521,12 +521,12 @@ std::string Chart::render ()
 
   optimizeGrid ();
 
-  if (context.color ())
+  if (Context::getContext().color ())
   {
     // Colorize the grid.
-    Color color_pending (context.config.get ("color.burndown.pending"));
-    Color color_done    (context.config.get ("color.burndown.done"));
-    Color color_started (context.config.get ("color.burndown.started"));
+    Color color_pending (Context::getContext().config.get ("color.burndown.pending"));
+    Color color_done    (Context::getContext().config.get ("color.burndown.done"));
+    Color color_started (Context::getContext().config.get ("color.burndown.started"));
 
     // Replace DD, SS, PP with colored strings.
     std::string::size_type i;
@@ -800,7 +800,7 @@ void Chart::calculateRates ()
                << ", with currently "
                << _current_count
                << " pending tasks";
-  context.debug (peak_message.str ());
+  Context::getContext().debug (peak_message.str ());
 
   // If there are no current pending tasks, then it is meaningless to find
   // rates or estimated completion date.
@@ -825,16 +825,16 @@ void Chart::calculateRates ()
                  << " = "
                  << _net_fix_rate
                  << " tasks/d";
-    context.debug (rate_message.str ());
+    Context::getContext().debug (rate_message.str ());
 
     Duration delta (static_cast <time_t> (_current_count / fix_rate));
     Datetime end = now + delta.toTime_t ();
 
     // Prefer dateformat.report over dateformat.
-    std::string format = context.config.get ("dateformat.report");
+    std::string format = Context::getContext().config.get ("dateformat.report");
     if (format == "")
     {
-      format = context.config.get ("dateformat");
+      format = Context::getContext().config.get ("dateformat");
       if (format == "")
         format = "Y-M-D";
     }
@@ -853,7 +853,7 @@ void Chart::calculateRates ()
                        << delta.format ()
                        << " --> "
                        << end.toISO ();
-    context.debug (completion_message.str ());
+    Context::getContext().debug (completion_message.str ());
   }
   else
   {

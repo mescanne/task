@@ -37,7 +37,7 @@
 #include <Table.h>
 #include <util.h>
 
-extern Context context;
+
 extern std::string configurationDefaults;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,11 +64,11 @@ int CmdShow::execute (std::string& output)
 
   // Obtain the arguments from the description.  That way, things like '--'
   // have already been handled.
-  std::vector <std::string> words = context.cli2.getWords ();
+  std::vector <std::string> words = Context::getContext().cli2.getWords ();
   if (words.size () > 1)
     throw std::string (STRING_CMD_SHOW_ARGS);
 
-  int width = context.getWidth ();
+  int width = Context::getContext().getWidth ();
 
   // Complain about configuration variables that are not recognized.
   // These are the regular configuration variables.
@@ -222,7 +222,7 @@ int CmdShow::execute (std::string& output)
   recognized += "_forcecolor ";
 
   std::vector <std::string> unrecognized;
-  for (auto& i : context.config)
+  for (auto& i : Context::getContext().config)
   {
     // Disallow partial matches by tacking a leading and trailing space on each
     // variable name.
@@ -257,7 +257,7 @@ int CmdShow::execute (std::string& output)
   Configuration default_config;
   default_config.parse (configurationDefaults);
 
-  for (auto& i : context.config)
+  for (auto& i : Context::getContext().config)
     if (i.second != default_config.get (i.first))
       default_values.push_back (i.first);
 
@@ -270,10 +270,10 @@ int CmdShow::execute (std::string& output)
 
   Color error;
   Color warning;
-  if (context.color ())
+  if (Context::getContext().color ())
   {
-    error   = Color (context.config.get ("color.error"));
-    warning = Color (context.config.get ("color.warning"));
+    error   = Color (Context::getContext().config.get ("color.error"));
+    warning = Color (Context::getContext().config.get ("color.warning"));
   }
 
   bool issue_error = false;
@@ -289,7 +289,7 @@ int CmdShow::execute (std::string& output)
     section = "";
 
   std::string::size_type loc;
-  for (auto& i : context.config)
+  for (auto& i : Context::getContext().config)
   {
     loc = i.first.find (section, 0);
     if (loc != std::string::npos)
@@ -331,7 +331,7 @@ int CmdShow::execute (std::string& output)
   {
     out << STRING_CMD_SHOW_DIFFER << '\n';
 
-    if (context.color () && warning.nontrivial ())
+    if (Context::getContext().color () && warning.nontrivial ())
       out << "  "
           << format (STRING_CMD_SHOW_DIFFER_COLOR, warning.colorize ("color"))
           << "\n\n";
@@ -345,7 +345,7 @@ int CmdShow::execute (std::string& output)
     for (auto& i : unrecognized)
       out << "  " << i << '\n';
 
-    if (context.color () && error.nontrivial ())
+    if (Context::getContext().color () && error.nontrivial ())
       out << '\n' << format (STRING_CMD_SHOW_DIFFER_COLOR, error.colorize ("color"));
 
     out << "\n\n";
@@ -358,7 +358,7 @@ int CmdShow::execute (std::string& output)
   // TODO Check for referenced but missing string files.
 
   // Check for bad values in rc.calendar.details.
-  std::string calendardetails = context.config.get ("calendar.details");
+  std::string calendardetails = Context::getContext().config.get ("calendar.details");
   if (calendardetails != "full"   &&
       calendardetails != "sparse" &&
       calendardetails != "none")
@@ -366,7 +366,7 @@ int CmdShow::execute (std::string& output)
         << '\n';
 
   // Check for bad values in rc.calendar.holidays.
-  std::string calendarholidays = context.config.get ("calendar.holidays");
+  std::string calendarholidays = Context::getContext().config.get ("calendar.holidays");
   if (calendarholidays != "full"   &&
       calendarholidays != "sparse" &&
       calendarholidays != "none")
@@ -376,14 +376,14 @@ int CmdShow::execute (std::string& output)
   // Verify installation.  This is mentioned in the documentation as the way
   // to ensure everything is properly installed.
 
-  if (context.config.size () == 0)
+  if (Context::getContext().config.size () == 0)
   {
     out << STRING_CMD_SHOW_EMPTY << '\n';
     rc = 1;
   }
   else
   {
-    Directory location (context.config.get ("data.location"));
+    Directory location (Context::getContext().config.get ("data.location"));
 
     if (location._data == "")
       out << STRING_CMD_SHOW_NO_LOCATION << '\n';
@@ -411,13 +411,13 @@ CmdShowRaw::CmdShowRaw ()
 int CmdShowRaw::execute (std::string& output)
 {
   // Get all the settings and sort alphabetically by name.
-  auto all = context.config.all ();
+  auto all = Context::getContext().config.all ();
   std::sort (all.begin (), all.end ());
 
   // Display them all.
   std::stringstream out;
   for (auto& i : all)
-    out << i << '=' << context.config.get (i) << '\n';
+    out << i << '=' << Context::getContext().config.get (i) << '\n';
 
   output = out.str ();
   return 0;

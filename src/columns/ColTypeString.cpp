@@ -33,7 +33,7 @@
 #include <format.h>
 #include <i18n.h>
 
-extern Context context;
+
 extern Task& contextTask;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ void ColumnTypeString::modify (Task& task, const std::string& value)
     if (validate (strValue))
     {
       task.set (_name, strValue);
-      context.debug (label + _name + " <-- '" + strValue + "' <-- '" + value + '\'');
+      Context::getContext().debug (label + _name + " <-- '" + strValue + "' <-- '" + value + '\'');
     }
     else
       throw format (STRING_INVALID_MOD, _name, value);
@@ -80,7 +80,7 @@ void ColumnTypeString::modify (Task& task, const std::string& value)
     if (validate (value))
     {
       task.set (_name, value);
-      context.debug (label + _name + " <-- '" + value + '\'');
+      Context::getContext().debug (label + _name + " <-- '" + value + '\'');
     }
     else
       throw format (STRING_INVALID_MOD, _name, value);

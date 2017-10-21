@@ -34,7 +34,7 @@
 #include <i18n.h>
 #include <main.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdDuplicate::CmdDuplicate ()
@@ -64,7 +64,7 @@ int CmdDuplicate::execute (std::string&)
   filter.subset (filtered);
   if (filtered.size () == 0)
   {
-    context.footnote (STRING_FEEDBACK_NO_TASKS_SP);
+    Context::getContext().footnote (STRING_FEEDBACK_NO_TASKS_SP);
     return 1;
   }
 
@@ -110,21 +110,21 @@ int CmdDuplicate::execute (std::string&)
                             task.get ("description")),
                     filtered.size ()))
     {
-      context.tdb2.add (dup);
+      Context::getContext().tdb2.add (dup);
       ++count;
       feedback_affected (STRING_CMD_DUPLICATE_TASK, task);
 
       auto status = dup.getStatus ();
-      if (context.verbose ("new-id") &&
+      if (Context::getContext().verbose ("new-id") &&
           (status == Task::pending ||
            status == Task::waiting))
         std::cout << format (STRING_CMD_ADD_FEEDBACK, dup.id) + '\n';
 
-      else if (context.verbose ("new-uuid") &&
+      else if (Context::getContext().verbose ("new-uuid") &&
                status != Task::recurring)
         std::cout << format (STRING_CMD_ADD_FEEDBACK, dup.get ("uuid")) + '\n';
 
-      if (context.verbose ("project"))
+      if (Context::getContext().verbose ("project"))
         projectChanges[task.get ("project")] = onProjectChange (task);
     }
     else
@@ -139,7 +139,7 @@ int CmdDuplicate::execute (std::string&)
   // Now list the project changes.
   for (const auto& change : projectChanges)
     if (change.first != "")
-      context.footnote (change.second);
+      Context::getContext().footnote (change.second);
 
   feedback_affected (count == 1 ? STRING_CMD_DUPLICATE_1 : STRING_CMD_DUPLICATE_N, count);
   return rc;

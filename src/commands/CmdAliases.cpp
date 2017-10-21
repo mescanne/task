@@ -30,7 +30,7 @@
 #include <Command.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdCompletionAliases::CmdCompletionAliases ()
@@ -51,7 +51,7 @@ CmdCompletionAliases::CmdCompletionAliases ()
 ////////////////////////////////////////////////////////////////////////////////
 int CmdCompletionAliases::execute (std::string& output)
 {
-  for (const auto& alias : context.config)
+  for (const auto& alias : Context::getContext().config)
     if (alias.first.substr (0, 6) == "alias.")
       output += alias.first.substr (6) + '\n';
 

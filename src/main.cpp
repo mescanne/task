@@ -31,12 +31,14 @@
 #include <i18n.h>
 #include <Context.h>
 
-Context context;
 
 ////////////////////////////////////////////////////////////////////////////////
 int main (int argc, const char** argv)
 {
+  Context globalcontext;
   int status {0};
+
+  Context::setContext(&globalcontext);
 
   // Lightweight version checking that doesn't require initialization or any I/O.
   if (argc == 2 && !strcmp (argv[1], "--version"))
@@ -47,9 +49,9 @@ int main (int argc, const char** argv)
   {
     try
     {
-      status = context.initialize (argc, argv);
+      status = Context::getContext().initialize (argc, argv);
       if (status == 0)
-        status = context.run ();
+        status = Context::getContext().run ();
     }
 
     catch (const std::string& error)

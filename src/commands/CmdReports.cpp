@@ -34,7 +34,7 @@
 #include <util.h>
 #include <i18n.h>
 
-extern Context context;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 CmdReports::CmdReports ()
@@ -58,7 +58,7 @@ int CmdReports::execute (std::string& output)
   std::vector <std::string> reports;
 
   // Add custom reports.
-  for (auto& i : context.config)
+  for (auto& i : Context::getContext().config)
   {
     if (i.first.substr (0, 7) == "report.")
     {
@@ -87,7 +87,7 @@ int CmdReports::execute (std::string& output)
   // Compose the output.
   std::stringstream out;
   Table view;
-  view.width (context.getWidth ());
+  view.width (Context::getContext().getWidth ());
   view.add (STRING_CMD_REPORTS_REPORT);
   view.add (STRING_CMD_REPORTS_DESC);
   setHeaderUnderline (view);
@@ -96,7 +96,7 @@ int CmdReports::execute (std::string& output)
   {
     int row = view.addRow ();
     view.set (row, 0, report);
-    view.set (row, 1, context.commands[report]->description ());
+    view.set (row, 1, Context::getContext().commands[report]->description ());
   }
 
   out << optionalBlankLine ()

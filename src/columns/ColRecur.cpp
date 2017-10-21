@@ -37,7 +37,7 @@
 #include <utf8.h>
 #include <i18n.h>
 
-extern Context context;
+
 extern Task& contextTask;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ ColumnRecur::ColumnRecur ()
   _label      = STRING_COLUMN_LABEL_RECUR;
   _modifiable = true;
   _styles     = {"duration", "indicator"};
-  _examples   = {"weekly", context.config.get ("recurrence.indicator")};
+  _examples   = {"weekly", Context::getContext().config.get ("recurrence.indicator")};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ void ColumnRecur::setStyle (const std::string& value)
   Column::setStyle (value);
 
   if (_style == "indicator" && _label == STRING_COLUMN_LABEL_RECUR)
-    _label = _label.substr (0, context.config.get ("recurrence.indicator").length ());
+    _label = _label.substr (0, Context::getContext().config.get ("recurrence.indicator").length ());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ void ColumnRecur::measure (Task& task, unsigned int& minimum, unsigned int& maxi
     }
     else if (_style == "indicator")
     {
-      minimum = maximum = utf8_width (context.config.get ("recurrence.indicator"));
+      minimum = maximum = utf8_width (Context::getContext().config.get ("recurrence.indicator"));
     }
   }
 }
@@ -95,7 +95,7 @@ void ColumnRecur::render (
       renderStringRight (lines, width, color, Duration (task.get (_name)).formatISO ());
 
     else if (_style == "indicator")
-      renderStringRight (lines, width, color, context.config.get ("recurrence.indicator"));
+      renderStringRight (lines, width, color, Context::getContext().config.get ("recurrence.indicator"));
   }
 }
 
@@ -123,7 +123,7 @@ void ColumnRecur::modify (Task& task, const std::string& value)
   {
     // Store the raw value, for 'recur'.
     std::string label = "  [1;37;43mMODIFICATION[0m ";
-    context.debug (label + _name + " <-- '" + value + '\'');
+    Context::getContext().debug (label + _name + " <-- '" + value + '\'');
     task.set (_name, value);
   }
   else

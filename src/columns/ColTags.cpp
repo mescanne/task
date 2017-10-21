@@ -37,7 +37,7 @@
 #include <utf8.h>
 #include <main.h>
 
-extern Context context;
+
 extern Task& contextTask;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ ColumnTags::ColumnTags ()
   _label     = STRING_COLUMN_LABEL_TAGS;
   _styles    = {"list", "indicator", "count"};
   _examples  = {STRING_COLUMN_EXAMPLES_TAGS,
-                context.config.get ("tag.indicator"),
+                Context::getContext().config.get ("tag.indicator"),
                 "[2]"};
   _hyphenate = false;
 }
@@ -62,7 +62,7 @@ void ColumnTags::setStyle (const std::string& value)
 
   if (_style == "indicator" &&
       _label == STRING_COLUMN_LABEL_TAGS)
-    _label = _label.substr (0, context.config.get ("tag.indicator").length ());
+    _label = _label.substr (0, Context::getContext().config.get ("tag.indicator").length ());
 
   else if (_style == "count" &&
             _label == STRING_COLUMN_LABEL_TAGS)
@@ -78,7 +78,7 @@ void ColumnTags::measure (Task& task, unsigned int& minimum, unsigned int& maxim
   {
     if (_style == "indicator")
     {
-      minimum = maximum = utf8_width (context.config.get ("tag.indicator"));
+      minimum = maximum = utf8_width (Context::getContext().config.get ("tag.indicator"));
     }
     else if (_style == "count")
     {
@@ -140,7 +140,7 @@ void ColumnTags::render (
     }
     else if (_style == "indicator")
     {
-      renderStringRight (lines, width, color, context.config.get ("tag.indicator"));
+      renderStringRight (lines, width, color, Context::getContext().config.get ("tag.indicator"));
     }
     else if (_style == "count")
     {
@@ -174,12 +174,12 @@ void ColumnTags::modify (Task& task, const std::string& value)
       Variant v;
       e.evaluateInfixExpression (value, v);
       task.addTag ((std::string) v);
-      context.debug (label + "tags <-- '" + (std::string) v + "' <-- '" + tag + '\'');
+      Context::getContext().debug (label + "tags <-- '" + (std::string) v + "' <-- '" + tag + '\'');
     }
     else
     {
       task.addTag (tag);
-      context.debug (label + "tags <-- '" + tag + '\'');
+      Context::getContext().debug (label + "tags <-- '" + tag + '\'');
     }
 
     feedback_special_tags (task, tag);

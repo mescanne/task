@@ -119,7 +119,7 @@ int main (int argc, char** argv)
       e.evaluatePostfixExpression (expression, result);
 
     // Show any debug output.
-    for (const auto& i : context.debugMessages)
+    for (const auto& i : Context::getContext().debugMessages)
       std::cout << i << '\n';
 
     // Show the result in string form.
